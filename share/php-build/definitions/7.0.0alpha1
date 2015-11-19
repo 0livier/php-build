@@ -1,3 +1,4 @@
+with_apxs2 /usr/bin/apxs
 install_package "http://downloads.php.net/~ab/php-7.0.0alpha1.tar.bz2"
 install_pyrus
 enable_builtin_opcache

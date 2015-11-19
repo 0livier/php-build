@@ -1,2 +1,3 @@
+with_apxs2 /usr/bin/apxs
 install_package "https://secure.php.net/distributions/php-5.4.28.tar.bz2"
 install_xdebug "2.3.3"
