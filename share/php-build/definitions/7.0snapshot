@@ -1,0 +1,4 @@
+install_package_from_github PHP-7.0
+install_pyrus
+install_xdebug_master
+enable_builtin_opcache

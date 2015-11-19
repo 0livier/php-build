@@ -1,4 +1,4 @@
-# php-build [![Build Status](https://secure.travis-ci.org/php-build/php-build.png?branch=master)](https://travis-ci.org/php-build/php-build)
+# php-build [![Build Status](https://secure.travis-ci.org/php-build/php-build.svg?branch=master)](https://travis-ci.org/php-build/php-build)
 
 php-build is a utility for building versions of PHP to use them side by side with each other. The overall structure is loosly borrowed from Sam Stephenson's [ruby-build].
 
@@ -51,7 +51,7 @@ The built version will be installed into `$HOME/.phpenv/versions/<definition>`.
 
 ## Contributing
 
-Issue reports and pull requests are always welcome. 
+Issue reports and pull requests are always welcome.
 
 - Freenode channel: `#php-build`
 - Google group: https://groups.google.com/forum/#!forum/php-build-developers
@@ -74,7 +74,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 php-build is released under the [MIT License][license].
 
 [contributors]: https://github.com/php-build/php-build/graphs/contributors
-[Gittipp-ing]: http://gittip.com/CHH
+[Gittipp-ing]: https://gittip.com/CHH
 [license]: LICENSE
 [phpenv]: https://github.com/CHH/phpenv
 [ruby-build]: https://github.com/sstephenson/ruby-build
