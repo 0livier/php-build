@@ -123,7 +123,9 @@ function _build_extension {
 
     log "$name" "Compiling $name in $source_dir"
 
-    cd "$source_dir/$source_cwd"
+    local apc_source_dir_fix=`echo $source_dir | sed -e 's/apc-/APC-/'`
+    [ -d "$source_dir/$source_cwd"  ] && cd "$source_dir/$source_cwd"
+    [ -d "$apc_source_dir_fix/$source_cwd"  ] && cd "$apc_source_dir_fix/$source_cwd"
 
     {
         $PREFIX/bin/phpize > /dev/null
