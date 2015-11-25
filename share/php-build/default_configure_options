@@ -31,3 +31,5 @@
 --disable-debug
 --enable-fpm
 --enable-bcmath
+--with-ldap
+--enable-intl
