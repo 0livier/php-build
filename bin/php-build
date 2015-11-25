@@ -613,6 +613,8 @@ $CONFIGURE_OPTIONS"
 
     sed -i -r 's#^(INSTALL_IT = \$\(mkinstalldirs\) )(.).+(..) \$.+#'"\1 \2$PREFIX/libexec/apache2/mods-available\2 \3 /usr/bin/apxs -S LIBEXECDIR=\2$PREFIX/libexec/apache2\2 -S SYSCONFDIR=\2$PREFIX/libexec/apache2\2 -i -n php5 libs/libphp5.so#" Makefile
 
+    sed -i -r 's#^(EXTRA_LIBS = .+)#\1 -llber#' Makefile
+
     cd "$backup_pwd"
 }
 
