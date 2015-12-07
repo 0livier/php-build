@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Update this when a new stable version comes around
-STABLE_DEFINITIONS="5.3.29 5.4.45 5.5.30 5.6.15 7.0.0RC7"
+STABLE_DEFINITIONS="5.3.29 5.4.45 5.5.30 5.6.16 7.0.0"
 
 TIME="$(date "+%Y%m%d%H%M%S")"
 
@@ -36,17 +36,14 @@ esac
 echo "Testing definitions $BUILD_LIST"
 echo
 
-[ -n "$TRAVIS" ] && while true; do echo "..."; sleep 60; done & #https://github.com/CHH/php-build/issues/134
+[ -n "$TRAVIS" ] && while true; do echo "..."; sleep 60; done & #https://github.com/php-build/php-build/issues/134
 
 for definition in $BUILD_LIST; do
     echo -n "Building '$definition'..."
-    if ./bin/php-build --pear "$definition" "$BUILD_PREFIX/$definition" &> /dev/null; then
+    if ./bin/php-build "$definition" "$BUILD_PREFIX/$definition"; then
         echo "OK"
 
         export TEST_PREFIX="$BUILD_PREFIX/$definition"
-
-        grep -e 'install_pyrus' "share/php-build/definitions/$definition" > /dev/null
-        export INSTALL_PYRUS=$?
 
         echo "Running Tests..."
         bats "tests/"
@@ -56,7 +53,7 @@ for definition in $BUILD_LIST; do
     fi
 done
 
-[ -n "$TRAVIS" ] && kill %1 #https://github.com/CHH/php-build/issues/134
+[ -n "$TRAVIS" ] && kill %1 #https://github.com/php-build/php-build/issues/134
 
 if [ -z "$FAILED" ]; then
     rm -rf "$BUILD_PREFIX"

@@ -19,7 +19,6 @@ set -e
 #/   -i|--ini <env>     php.ini to use. If <env> is a file then this file is
 #/                      used, otherwise php.ini-<env> from the source
 #/                      distribution is used. Defaults to "production".
-#/   --pear             Install PEAR alongside of Pyrus (experimental)
 #/   -v|--version       Display version information and exit
 #/
 #
@@ -78,11 +77,11 @@ CONFIGURE_OPTIONS=$(cat "$PHP_BUILD_ROOT/share/php-build/default_configure_optio
 PATCH_FILES=""
 
 # Whether do "make clean" after installation or not
-[ -z "$PHPBUILD_KEEP_OBJECT_FILES" ] && PHPBUILD_KEEP_OBJECT_FILES=off
+[ -z "$PHP_BUILD_KEEP_OBJECT_FILES" ] && PHP_BUILD_KEEP_OBJECT_FILES=off
 
-[ -z "$PHPBUILD_EXTRA_MAKE_ARGUMENTS" ] && PHPBUILD_EXTRA_MAKE_ARGUMENTS=""
+[ -z "$PHP_BUILD_EXTRA_MAKE_ARGUMENTS" ] && PHP_BUILD_EXTRA_MAKE_ARGUMENTS=""
 
-[ -z "$PHPBUILD_INSTALL_EXTENSION" ] && PHPBUILD_INSTALL_EXTENSION=""
+[ -z "$PHP_BUILD_INSTALL_EXTENSION" ] && PHP_BUILD_INSTALL_EXTENSION=""
 
 if [ -n "$PHP_BUILD_CONFIGURE_OPTS" ]; then
     CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS $PHP_BUILD_CONFIGURE_OPTS"
@@ -284,6 +283,7 @@ function list_definitions() {
 function trigger_before_install() {
     export PHP_BUILD_ROOT
     export PREFIX
+    export SOURCE_PATH="$1"
 
     local triggers_dir="$PHP_BUILD_ROOT/share/php-build/before-install.d/"
     local triggers=$(ls "$triggers_dir")
@@ -346,7 +346,7 @@ function build_package() {
 
     configure_package "$source_path"
 
-    trigger_before_install 2>&4
+    trigger_before_install "$source_path" 2>&4
 
     apply_patches "$source_path" 2>&4
 
@@ -354,9 +354,9 @@ function build_package() {
 
     cd "$source_path"
     {
-        make $PHPBUILD_EXTRA_MAKE_ARGUMENTS
+        make $PHP_BUILD_EXTRA_MAKE_ARGUMENTS
         make install
-        if [ "$PHPBUILD_KEEP_OBJECT_FILES" == "off" ]; then
+        if [ "$PHP_BUILD_KEEP_OBJECT_FILES" == "off" ]; then
             make clean
         fi
     } > /dev/null
@@ -404,7 +404,7 @@ function apply_patches() {
 function install_extensions() {
     # handle extensions that should be installed by defined environment variable
     # variable must be in the format: extension_name=version extension_name=version
-    for extension_def in $PHPBUILD_INSTALL_EXTENSION; do
+    for extension_def in $PHP_BUILD_INSTALL_EXTENSION; do
         local extension=$(echo $extension_def | cut -d"=" -f1)
         local version=$(echo $extension_def | cut -d"=" -f2)
         local first_char=$(echo $version | cut -c1 )
@@ -523,22 +523,6 @@ function patch_file() {
 # was in the list of default configure arguments.
 function with_openssl() {
     stub=1
-}
-
-# ### with_pear
-#
-# Configures a `pear` install in `$PREFIX/pear`.
-function with_pear() {
-    pear_dir="$PREFIX/pear"
-
-    [ ! -d "$PREFIX/pear" ] && mkdir -p "$PREFIX/pear"
-
-    configure_option "--with-pear" "$PREFIX/pear"
-}
-
-function pear_setup() {
-    "$PREFIX/bin/pear" config-set php_ini "$PREFIX/etc/php.ini" system
-    "$PREFIX/bin/pear" config-set auto_discover 1
 }
 
 function with_apxs2() {
@@ -736,11 +720,6 @@ if [ "$1" = "-i" ] || [ "$1" = "--ini" ]; then
     shift
 fi
 
-if [ "$1" = "--pear" ]; then
-    ENABLE_PEAR=1
-    shift
-fi
-
 # This is the name of the definition we want to build.
 DEFINITION=$1
 
@@ -750,10 +729,6 @@ PREFIX=$2
 if [ -z "$PREFIX" ]; then
     display_usage
     exit 1
-fi
-
-if [ "$ENABLE_PEAR" = "1" ]; then
-    with_pear
 fi
 
 if ! find_definition "$DEFINITION" > /dev/null; then
@@ -772,15 +747,12 @@ LOG_PATH="/tmp/php-build.$LOG_NAME.$TIME.log"
 # to the Log file.
 exec 4<> "$LOG_PATH"
 
-[ "$ENABLE_PEAR" = "1" ] && log Warning "Installing Pear alongside of Pyrus is still experimental."
-
 # Load extension plugin
 source "$PHP_BUILD_ROOT/share/php-build/extension/extension.sh"
 log Info "Loaded extension plugin"
 
 # Load all definition plugins. Plugins register functions
-# for use whithin definitions. See the xdebug and pyrus plugins for
-# examples.
+# for use whithin definitions. See the xdebug plugin examples.
 load_plugins "$PHP_BUILD_ROOT/share/php-build/plugins.d"
 
 log Info "$PHP_DEFAULT_INI gets used as php.ini"
@@ -797,10 +769,6 @@ source "$DEFINITION_PATH"
 
 # Run executables placed in `share/php-build/after-install.d`
 trigger_after_install 2>&4
-
-if [ "$ENABLE_PEAR" = "1" ]; then
-    pear_setup
-fi
 
 # Installed extensions defined by environment variable
 install_extensions 2>&4
